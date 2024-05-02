@@ -1,0 +1,74 @@
+default_language_version:
+  python: python3.12
+
+exclude: ^migrations/
+
+repos:
+  # Formatters
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+#      - id: no-commit-to-branch
+#        args: [ -b, main, -b, master, -b, dev, -b develop ]
+      - id: check-merge-conflict
+
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+      - id: pretty-format-json
+        args: [ --autofix, --no-sort-keys ]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.4.2'
+    hooks:
+      - id: ruff
+        args: [ --exit-non-zero-on-fix ]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.2
+    hooks:
+      - id: pyupgrade
+
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+
+  # Linters
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-ast
+      - id: check-docstring-first
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-executables-have-shebangs
+      - id: debug-statements
+
+  - repo: https://github.com/python-poetry/poetry
+    rev: '1.8.0'
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy --no-namespace-packages
+        require_serial: true
+        language: system
+        types: [ python ]
+
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [ python ]
+        args:
+          [
+            "-rn", # Only display messages
+#            "-sn", # Don't display the score
+          ]

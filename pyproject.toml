@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "test-task-for-checkbox"
+version = "0.1.0"
+description = ""
+authors = ["koev <koevgenywork@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.18.1"
+ipython = "^8.21.0"
+
+ruff = "^0.0.282"
+pyupgrade = "^3.15.2"
+black = "24.4.2"
+
+pylint = "^3.0.0a6"
+mypy = "^1.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ============================================================================
+# Linters section
+
+[tool.ruff]
+target-version = "py312"
+line-length = 79
+select = ["ALL"]
+ignore = [
+    "ANN",  # Checked by mypy
+    "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203", "D213",
+    "TD002", "TD003",
+    "FIX002",
+#    "RUF012"
+]
+fix = true
+show-fixes = true
+unfixable = ["F401"]
+ignore-init-module-imports = true
+
+[tool.black]
+line-length = 79
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_typed = true
+
+[tool.pylint.main]
+disable = [
+    # Replaced by ruff
+    "C0114", "C0115", "C0116", "W0611", "C0105", "C0131", "C0132", "C0205", "C0208", "C0414", "C1901", "C3002", "E0100", "E0101", "E0116", "E0117", "E0118", "E0241", "E0302", "E0307", "E0604", "E0605", "E1142", "E1205", "E1206", "E1300", "E1307", "E1310", "E1507", "E1700", "E2502", "E2510", "E2512", "E2513", "E2514", "E2515", "R0124", "R0133", "R0206", "R0402", "R0911", "R0912", "R0913", "R0915", "R1701", "R1711", "R1714", "R1722", "W0120", "W0127", "W0129", "W0131", "W0406", "W0602", "W0603", "W0711", "W1508", "W1509", "W1510", "W3301",
+    # Checked by ruff
+    "W0613"
+]
+max-line-length = 79
