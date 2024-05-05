@@ -18,11 +18,11 @@ repos:
       - id: pretty-format-json
         args: [ --autofix, --no-sort-keys ]
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.4.2'
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.3
     hooks:
       - id: ruff
-        args: [ --exit-non-zero-on-fix ]
+        args: ["--exit-non-zero-on-fix"]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.2

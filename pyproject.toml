@@ -7,6 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+fastapi = "^0.111.0"
+passlib = "^1.7.4"
 
 [tool.poetry.group.dev]
 optional = true
@@ -14,12 +16,13 @@ optional = true
 pre-commit = "^2.18.1"
 ipython = "^8.21.0"
 
-ruff = "^0.0.282"
+ruff = "^0.4.3"
 pyupgrade = "^3.15.2"
 black = "24.4.2"
 
 pylint = "^3.0.0a6"
-mypy = "^1.7.0"
+mypy = "^1.10.0"
+types-passlib = "^1.7.7"
 
 
 [build-system]
@@ -32,18 +35,25 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 target-version = "py312"
 line-length = 79
+fix = true
+show-fixes = true
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     "ANN",  # Checked by mypy
     "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203", "D213",
     "TD002", "TD003",
     "FIX002",
+    "TRY003",
+    "EM"
 #    "RUF012"
 ]
-fix = true
-show-fixes = true
-unfixable = ["F401"]
 ignore-init-module-imports = true
+unfixable = ["F401"]
+
+
+
 
 [tool.black]
 line-length = 79
