@@ -52,9 +52,6 @@ ignore = [
 ignore-init-module-imports = true
 unfixable = ["F401"]
 
-
-
-
 [tool.black]
 line-length = 79
 

@@ -57,10 +57,11 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: mypy --no-namespace-packages
+        entry: mypy
         require_serial: true
         language: system
         types: [ python ]
+        args: ["--no-namespace-packages"]
 
       - id: pylint
         name: pylint

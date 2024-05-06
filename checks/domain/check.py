@@ -46,7 +46,7 @@ class _CheckABC(BaseModel, ABC, Generic[ProductTypeVar]):
     def products(self) -> Iterable[ProductTypeVar]:
         raise NotImplementedError
 
-    @computed_field  # type: ignore[misc]
+    @computed_field(return_type=Decimal)  # type: ignore[misc]
     @cached_property
     def total(self) -> Decimal | Literal[0]:
         return sum(product.total for product in self.products)
