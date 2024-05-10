@@ -13,12 +13,14 @@ from pydantic import (
     model_validator,
 )
 
-Money = Annotated[Decimal, Field(decimal_places=2, gt=0)]
+from checks.domain.constants import PaymentType
+
+_Money = Annotated[Decimal, Field(decimal_places=2, gt=0)]
 
 
 class _ProductCreate(BaseModel, frozen=True):
     name: str
-    price: Money
+    price: _Money
     quantity: PositiveInt
 
     @cached_property
@@ -27,23 +29,23 @@ class _ProductCreate(BaseModel, frozen=True):
 
 
 class _Payment(BaseModel):
-    type: Literal["cash", "cashless"]
-    amount: Money
+    type: PaymentType
+    amount: _Money
 
 
-ProductTypeVar = TypeVar("ProductTypeVar", bound=_ProductCreate)
+_ProductTypeVar = TypeVar("_ProductTypeVar", bound=_ProductCreate)
 
 
-class _CheckABC(BaseModel, ABC, Generic[ProductTypeVar]):
+class _CheckABC(BaseModel, ABC, Generic[_ProductTypeVar]):
     products_field: Annotated[
-        set[ProductTypeVar],
+        tuple[_ProductTypeVar, ...],
         Field(exclude=True, alias="products", min_length=1),
     ]
     payment: _Payment
 
     @property
     @abstractmethod
-    def products(self) -> Iterable[ProductTypeVar]:
+    def products(self) -> Iterable[_ProductTypeVar]:
         raise NotImplementedError
 
     @computed_field(return_type=Decimal)  # type: ignore[misc]
@@ -62,7 +64,7 @@ class CheckCreate(_CheckABC[_ProductCreate]):
     # pylint: disable=too-few-public-methods
     @computed_field  # type: ignore[misc]
     @cached_property
-    def products(self) -> set[_ProductCreate]:
+    def products(self) -> tuple[_ProductCreate, ...]:
         return self.products_field
 
 
@@ -78,7 +80,7 @@ class Check(_CheckABC[_Product], from_attributes=True):
 
     @computed_field  # type: ignore[misc]
     @cached_property
-    def products(self) -> set[_Product]:
+    def products(self) -> tuple[_Product, ...]:
         return self.products_field
 
     @computed_field  # type: ignore[misc]
