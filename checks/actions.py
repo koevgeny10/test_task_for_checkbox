@@ -1,12 +1,10 @@
 # ruff: noqa: ARG001
-from collections.abc import Mapping
-from typing import Any
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from checks import repository
-from checks.domain.check import Check, CheckCreate
-from checks.domain.user import UserCreate
+from checks.domain.base import PageParams
+from checks.domain.check import Check, CheckCreate, CheckFilters
+from checks.domain.schemas import UserCreate
 
 
 async def create_user(session: AsyncSession, user_create: UserCreate) -> None:
@@ -32,6 +30,12 @@ async def get_check_in_text(session: AsyncSession, check_id: int) -> str:
 async def get_checks(
     session: AsyncSession,
     user_id: int,
-    filters: Mapping[str, Any],
+    check_filters: CheckFilters | None = None,
+    page_params: PageParams | None = None,
 ) -> tuple[Check, ...]:
-    return await repository.get_checks(session, user_id, filters)
+    return await repository.get_checks(
+        session,
+        user_id,
+        check_filters,
+        page_params,
+    )

@@ -10,15 +10,23 @@ from pydantic import (
     model_validator,
 )
 
-from checks.domain.constants import PASSWORD_MIN_LENGTH, PWD_CONTEXT
+from checks.domain.constants import PWD_CONTEXT
 
-Password = Annotated[SecretStr, Field(min_length=PASSWORD_MIN_LENGTH)]
+Password = Annotated[SecretStr, Field(min_length=6)]
+
+
+class UserEmail(BaseModel):
+    email: EmailStr
+
+
+class UserBase(UserEmail):
+    name: str
+
+
 _PasswordForCheck = Annotated[Password, Field(exclude=True)]
 
 
-class UserCreate(BaseModel):
-    name: str
-    email: EmailStr
+class UserCreate(UserBase):
     password: _PasswordForCheck
     password2: _PasswordForCheck
 

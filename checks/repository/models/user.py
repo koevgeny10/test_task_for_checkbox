@@ -1,3 +1,4 @@
+from sqlalchemy import true
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.expression import false
 
@@ -14,3 +15,4 @@ class UserModel(BaseModel):  # pylint: disable=too-few-public-methods
         server_default=false(),
     )
     hashed_password: Mapped[str]
+    is_active: Mapped[bool] = mapped_column(server_default=true())

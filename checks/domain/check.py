@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import Annotated, Generic, Literal, Self, TypeVar
+from typing import Annotated, Generic, Literal, Self, TypedDict, TypeVar
 
 from pydantic import (
     BaseModel,
@@ -13,6 +14,7 @@ from pydantic import (
     model_validator,
 )
 
+from checks.domain.base import IdSchema
 from checks.domain.constants import PaymentType
 
 _Money = Annotated[Decimal, Field(decimal_places=2, gt=0)]
@@ -74,8 +76,8 @@ class _Product(_ProductCreate):
     )
 
 
-class Check(_CheckABC[_Product], from_attributes=True):
-    id: int
+class Check(IdSchema, _CheckABC[_Product]):
+    user_id: PositiveInt
     created_at: PastDatetime
 
     @computed_field  # type: ignore[misc]
@@ -87,3 +89,11 @@ class Check(_CheckABC[_Product], from_attributes=True):
     @cached_property
     def rest(self) -> Decimal:
         return self.payment.amount - self.total
+
+
+class CheckFilters(TypedDict, total=False):
+    created_at__ge: datetime | None
+    created_at__le: datetime | None
+    total__ge: Decimal | None
+    total__le: Decimal | None
+    payment_type__eq: PaymentType | None

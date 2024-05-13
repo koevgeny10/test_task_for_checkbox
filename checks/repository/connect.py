@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from checks.settings import DEBUG
+
 
 def get_db_url() -> URL:
     return URL.create(
@@ -21,7 +23,7 @@ def get_db_url() -> URL:
     )
 
 
-get_sa_engine = partial(create_async_engine)
+get_sa_engine = partial(create_async_engine, echo=DEBUG)
 get_sa_sessionmaker = partial(async_sessionmaker, expire_on_commit=False)
 
 sa_session_getter = get_sa_sessionmaker(bind=get_sa_engine(get_db_url()))

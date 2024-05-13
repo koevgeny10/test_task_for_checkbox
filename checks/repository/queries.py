@@ -4,8 +4,11 @@ from typing import Any
 
 from sqlalchemy import ColumnElement, Select, select
 
+from checks.domain.base import PageParams
+from checks.domain.check import CheckFilters
 from checks.repository.models.base import BaseModel
 from checks.repository.models.check import CheckModel
+from checks.repository.models.user import UserModel
 
 
 def _get_whereclauses_for_sa_query(
@@ -25,9 +28,27 @@ def _get_whereclauses_for_sa_query(
 
 def get_select_checks_sql_query(
     check_id: int,
-    filters: Mapping[str, Any],
+    check_filters: CheckFilters | None = None,
+    page_params: PageParams | None = None,
 ) -> Select[tuple[CheckModel]]:
-    return select(CheckModel).where(
+    stmt = select(CheckModel).where(
         CheckModel.id == check_id,
-        *_get_whereclauses_for_sa_query(CheckModel, filters),
     )
+    if check_filters is not None:
+        stmt = stmt.where(
+            *_get_whereclauses_for_sa_query(CheckModel, check_filters),
+        )
+    if page_params is not None:
+        offset = page_params.get("offset")
+        if offset is not None:
+            stmt = stmt.offset(offset)
+        limit = page_params.get("limit")
+        if limit is not None:
+            stmt = stmt.limit(limit)
+    return stmt
+
+
+def get_select_user_filtered_by_email_sql_query(
+    email: str,
+) -> Select[tuple[UserModel]]:
+    return select(UserModel).where(UserModel.email == email)

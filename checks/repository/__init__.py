@@ -1,19 +1,31 @@
-from collections.abc import Mapping
-from typing import Any
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from checks.domain.check import Check, CheckCreate
-from checks.domain.user import UserCreate
+from checks.domain.base import PageParams
+from checks.domain.check import Check, CheckCreate, CheckFilters
+from checks.domain.schemas import UserCreate
 from checks.repository.models.check import CheckModel
 from checks.repository.models.user import UserModel
-from checks.repository.queries import get_select_checks_sql_query
+from checks.repository.queries import (
+    get_select_checks_sql_query,
+    get_select_user_filtered_by_email_sql_query,
+)
 
 
 async def create_user(session: AsyncSession, user_create: UserCreate) -> None:
     user = UserModel(**user_create.model_dump())
     async with session.begin():
         session.add(user)
+
+
+async def get_user_by_email(
+    session: AsyncSession,
+    email: str,
+) -> UserModel | None:
+    return (
+        await session.execute(
+            get_select_user_filtered_by_email_sql_query(email),
+        )
+    ).scalar()
 
 
 async def create_check(
@@ -34,11 +46,12 @@ async def get_check(session: AsyncSession, check_id: int) -> Check:
 async def get_checks(
     session: AsyncSession,
     user_id: int,
-    filters: Mapping[str, Any],
+    check_filters: CheckFilters | None = None,
+    page_params: PageParams | None = None,
 ) -> tuple[Check, ...]:
     return tuple(
         Check.model_validate(check)
         for check in await session.scalars(
-            get_select_checks_sql_query(user_id, filters),
+            get_select_checks_sql_query(user_id, check_filters, page_params),
         )
     )
