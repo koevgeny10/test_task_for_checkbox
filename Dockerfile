@@ -84,3 +84,19 @@ ENV WATCHFILES_FORCE_POLLING=true
 #    && rm -rf /var/lib/apt/lists/*
 
 CMD [ "--reload" ]
+
+FROM src AS migrations
+
+COPY alembic.ini .
+COPY migrations migrations
+
+ENTRYPOINT ["bash"]
+
+FROM migrations AS tests
+
+ENV PYTHONBREAKPOINT=ipdb.set_trace
+ENV DEBUG=0
+
+COPY tests tests
+
+ENTRYPOINT ["pytest", "tests", "--durations=5", "-v", "-l", "--color=yes", "--code-highlight=yes"]
