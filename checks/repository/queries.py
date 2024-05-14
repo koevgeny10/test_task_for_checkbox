@@ -27,12 +27,12 @@ def _get_whereclauses_for_sa_query(
 
 
 def get_select_checks_sql_query(
-    check_id: int,
+    user_id: int,
     check_filters: CheckFilters | None = None,
     page_params: PageParams | None = None,
 ) -> Select[tuple[CheckModel]]:
     stmt = select(CheckModel).where(
-        CheckModel.id == check_id,
+        CheckModel.user_id == user_id,
     )
     if check_filters is not None:
         stmt = stmt.where(

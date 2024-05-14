@@ -48,11 +48,11 @@ async def get_check_filters(
     ] = None,
     total__ge: Annotated[
         Decimal | None,
-        Query(decimal_places=2, gt=0),
+        Query(gt=0),
     ] = None,
     total__le: Annotated[
         Decimal | None,
-        Query(decimal_places=2, gt=0),
+        Query(gt=0),
     ] = None,
     payment_type__eq: Annotated[PaymentType | None, Query()] = None,
 ) -> CheckFilters:

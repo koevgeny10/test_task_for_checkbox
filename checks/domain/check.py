@@ -23,14 +23,14 @@ _Money = Annotated[Decimal, Field(decimal_places=2, gt=0)]
 class _ProductCreate(BaseModel, frozen=True):
     name: str
     price: _Money
-    quantity: PositiveInt
+    quantity: Annotated[int, Field(ge=1)]
 
     @cached_property
     def total(self) -> Decimal:
         return self.price * self.quantity
 
 
-class _Payment(BaseModel):
+class _Payment(BaseModel, from_attributes=True):
     type: PaymentType
     amount: _Money
 
@@ -70,7 +70,7 @@ class CheckCreate(_CheckABC[_ProductCreate]):
         return self.products_field
 
 
-class _Product(_ProductCreate):
+class _Product(_ProductCreate, from_attributes=True):
     total = computed_field(  # type: ignore[assignment, pydantic-field]
         _ProductCreate.total,
     )

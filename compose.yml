@@ -1,0 +1,139 @@
+x-restart_and_tty: &restart_and_tty
+  restart: unless-stopped
+  tty: true
+
+x-postgres: &postgres
+  <<: *restart_and_tty
+  image: postgres:16
+  healthcheck:
+    test: bash -c "pg_isready --username=$${POSTGRES_USER} --dbname=$${POSTGRES_DB}"
+    start_period: 10s
+    interval: 5s
+
+x-depends_on_postgres: &depends_on_postgres
+  postgres:
+    condition: service_healthy
+
+x-src: &launch
+  <<: *restart_and_tty
+  init: true
+  depends_on:
+    <<: *depends_on_postgres
+
+x-api: &api
+  <<: *launch
+  ports: [ "80:80" ]
+  env_file: .env
+
+x-db_envs: &db_envs
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB}
+
+x-tests: &tests
+  build:
+    context: .
+    target: tests
+    args: [ "POETRY_KEYS=--with migrations,tests" ]
+  environment:
+    POSTGRES_USER: tests
+    POSTGRES_PASSWORD: tests
+    POSTGRES_DB: tests
+    POSTGRES_HOST: tests_postgres
+    POSTGRES_PORT: 5433
+  depends_on:
+    tests_postgres:
+      condition: service_healthy
+  tty: true
+
+services:
+  postgres:
+    profiles: [ "prod", "dev", "migrations" ]
+    <<: *postgres
+    environment:
+      <<: *db_envs
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  prod:
+    profiles: [ "prod" ]
+    <<: *api
+    build:
+      context: .
+      target: prod
+    environment:
+      DEBUG: 0
+    volumes:
+      - ./configs/jwt:/opt/app/jwt
+
+  dev:
+    profiles: [ "dev" ]
+    <<: *api
+    build:
+      context: .
+      target: dev
+    environment:
+      DEBUG: 1
+    volumes:
+      - ./checks:/opt/app/checks
+      - ./configs/jwt:/opt/app/jwt
+
+  migrations:
+    profiles: [ "migrations" ]
+    build:
+      context: .
+      target: migrations
+      args: [ "POETRY_KEYS=--with migrations,dev" ]
+    environment:
+      <<: *db_envs
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - ./alembic.ini:/opt/app/alembic.ini
+      - ./migrations:/opt/app/migrations
+      - ./checks:/opt/app/checks
+    depends_on:
+      <<: *depends_on_postgres
+    tty: true
+
+
+
+  tests_postgres:
+    profiles: [ "tests", "tests_dev" ]
+    <<: *postgres
+    environment:
+      POSTGRES_USER: tests
+      POSTGRES_PASSWORD: tests
+      POSTGRES_DB: tests
+      PGPORT: 5433
+
+  tests:
+    profiles: [ "tests" ]
+    <<: *tests
+
+  tests_dev:
+    profiles: [ "tests_dev" ]
+    <<: *tests
+    command: --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb -s #-k test_session_transaction
+    stdin_open: true
+    volumes:
+      - ./checks:/opt/app/checks
+      - ./tests:/opt/app/tests
+
+
+
+  pgadmin:
+    profiles: [ "prod", "dev" ]
+    <<: *restart_and_tty
+    depends_on:
+      <<: *depends_on_postgres
+    image: dpage/pgadmin4
+    volumes:
+      - ./configs/pgadmin4/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports: [ "5050:80" ]
+
+volumes:
+  postgres_data:
