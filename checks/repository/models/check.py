@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, composite, mapped_column, relationship
 
 from checks.domain.constants import PaymentType
@@ -38,11 +38,12 @@ class CheckModel(BaseModel):
         back_populates="check",
         lazy="selectin",
     )
-    payment_type: Mapped[PaymentType]
-    payment_amount: Mapped[Decimal]
-    payment: Mapped[_Payment] = composite("payment_type", "payment_amount")
+    payment_type: Mapped[PaymentType] = mapped_column()
+    payment_amount: Mapped[Decimal] = mapped_column()
+    payment: Mapped[_Payment] = composite(payment_type, payment_amount)
     total: Mapped[Decimal]
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         server_default=func.now(),  # pylint: disable=not-callable
     )
 
