@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
 from typing import Annotated, Generic, Literal, Self, TypedDict, TypeVar
+from uuid import UUID
 
 from pydantic import (
     BaseModel,
@@ -71,12 +72,14 @@ class CheckCreate(_CheckABC[_ProductCreate]):
 
 
 class _Product(_ProductCreate, from_attributes=True):
-    total = computed_field(  # type: ignore[assignment, pydantic-field]
-        _ProductCreate.total,
-    )
+    @computed_field  # type: ignore[misc]
+    @cached_property
+    def total(self) -> Decimal:
+        return super().total
 
 
 class Check(IdSchema, _CheckABC[_Product]):
+    public_id: UUID
     user_id: PositiveInt
     created_at: PastDatetime
 

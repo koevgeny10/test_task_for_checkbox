@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import (
     APIRouter,
@@ -11,6 +12,7 @@ from fastapi import (
     Query,
     status,
 )
+from fastapi.responses import PlainTextResponse
 
 from checks import actions
 from checks.api.constants import EndpointTag
@@ -93,3 +95,12 @@ async def get_check(
         status_code=status.HTTP_402_PAYMENT_REQUIRED,
         detail="Користувач не має доступу до цього чеку.",
     )
+
+
+@check_router.get("/{check_public_id}/text", response_class=PlainTextResponse)
+async def get_check_in_text(
+    session: SessionDepAnnotated,
+    check_public_id: UUID,
+    line_len: Annotated[int, Query(ge=1)] = 30,
+) -> str:
+    return await actions.get_check_in_text(session, check_public_id, line_len)

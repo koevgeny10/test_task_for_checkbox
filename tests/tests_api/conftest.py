@@ -59,6 +59,7 @@ async def _save_checks(session: AsyncSession, user: UserModel) -> None:
         session.add_all(
             [
                 CheckModel(
+                    public_id="fb8c829a-4a4e-4703-b77a-a5980def7647",
                     user_id=user.id,
                     products=[
                         {

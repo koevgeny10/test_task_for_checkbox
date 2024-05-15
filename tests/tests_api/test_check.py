@@ -126,3 +126,12 @@ async def test_get_check(registered_client: AsyncClient) -> None:
     response = await registered_client.get("checks/3")
     assert response.status_code == 200
     assert response.json()["id"] == 3
+
+
+@pytest.mark.usefixtures("save_checks")
+async def test_get_check_in_text(client: AsyncClient) -> None:
+    response = await client.get(
+        "checks/fb8c829a-4a4e-4703-b77a-a5980def7647/text",
+    )
+    assert response.status_code == 200
+    assert len(response.text) > 0

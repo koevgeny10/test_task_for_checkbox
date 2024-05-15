@@ -1,6 +1,7 @@
 import operator
 from collections.abc import Generator, Mapping
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import ColumnElement, Select, select
 
@@ -52,3 +53,9 @@ def get_select_user_filtered_by_email_sql_query(
     email: str,
 ) -> Select[tuple[UserModel]]:
     return select(UserModel).where(UserModel.email == email)
+
+
+def get_select_check_by_public_id_sql_query(
+    check_public_id: UUID,
+) -> Select[tuple[CheckModel]]:
+    return select(CheckModel).where(CheckModel.public_id == check_public_id)

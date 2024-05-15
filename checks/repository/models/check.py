@@ -3,8 +3,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
+from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, func, text
 from sqlalchemy.orm import Mapped, composite, mapped_column, relationship
 
 from checks.domain.constants import PaymentType
@@ -31,6 +32,11 @@ class _Payment:
 
 
 class CheckModel(BaseModel):
+    public_id: Mapped[UUID] = mapped_column(
+        unique=True,
+        index=True,
+        server_default=text("gen_random_uuid()"),
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
     )
