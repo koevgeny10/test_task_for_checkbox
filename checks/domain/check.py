@@ -18,7 +18,13 @@ from pydantic import (
 from checks.domain.base import IdSchema
 from checks.domain.constants import PaymentType
 
-_Money = Annotated[Decimal, Field(decimal_places=2, gt=0)]
+money_field = Field(
+    decimal_places=2,
+    gt=0,
+    description="Гроші",
+    examples=["123.45", "1"],
+)
+_Money = Annotated[Decimal, money_field]
 
 
 class _ProductCreate(BaseModel, frozen=True):
@@ -51,7 +57,7 @@ class _CheckABC(BaseModel, ABC, Generic[_ProductTypeVar]):
     def products(self) -> Iterable[_ProductTypeVar]:
         raise NotImplementedError
 
-    @computed_field(return_type=Decimal)  # type: ignore[misc]
+    @computed_field(return_type=_Money)  # type: ignore[misc]
     @cached_property
     def total(self) -> Decimal | Literal[0]:
         return sum(product.total for product in self.products)
@@ -74,7 +80,7 @@ class CheckCreate(_CheckABC[_ProductCreate]):
 class _Product(_ProductCreate, from_attributes=True):
     @computed_field  # type: ignore[misc]
     @cached_property
-    def total(self) -> Decimal:
+    def total(self) -> _Money:
         return super().total
 
 
@@ -90,7 +96,17 @@ class Check(IdSchema, _CheckABC[_Product]):
 
     @computed_field  # type: ignore[misc]
     @cached_property
-    def rest(self) -> Decimal:
+    def rest(
+        self,
+    ) -> Annotated[
+        Decimal,
+        Field(
+            ge=0,
+            decimal_places=2,
+            description=money_field.description,
+            examples=money_field.examples,
+        ),
+    ]:
         return self.payment.amount - self.total
 
 

@@ -1,5 +1,3 @@
-from datetime import datetime
-from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
@@ -17,11 +15,11 @@ from fastapi.responses import PlainTextResponse
 from checks import actions
 from checks.api.constants import EndpointTag
 from checks.api.dependencies.auth import CurrentUserIdDepAnnotated
+from checks.api.dependencies.check import get_check_filters
 from checks.api.dependencies.db import SessionDepAnnotated
 from checks.api.dependencies.pagination import get_page_params
 from checks.domain.base import PageParams
 from checks.domain.check import Check, CheckCreate, CheckFilters
-from checks.domain.constants import PaymentType
 
 check_router = APIRouter(prefix="/checks", tags=[EndpointTag.CHECK])
 
@@ -37,34 +35,6 @@ async def create_check(
     check_create: Annotated[CheckCreate, Body()],
 ) -> Check:
     return await actions.create_check(session, user_id, check_create)
-
-
-async def get_check_filters(
-    created_at__ge: Annotated[
-        datetime | None,
-        Query(),
-    ] = None,
-    created_at__le: Annotated[
-        datetime | None,
-        Query(),
-    ] = None,
-    total__ge: Annotated[
-        Decimal | None,
-        Query(gt=0),
-    ] = None,
-    total__le: Annotated[
-        Decimal | None,
-        Query(gt=0),
-    ] = None,
-    payment_type__eq: Annotated[PaymentType | None, Query()] = None,
-) -> CheckFilters:
-    return CheckFilters(
-        created_at__ge=created_at__ge,
-        created_at__le=created_at__le,
-        total__ge=total__ge,
-        total__le=total__le,
-        payment_type__eq=payment_type__eq,
-    )
 
 
 @check_router.get("/")

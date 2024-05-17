@@ -8,5 +8,5 @@ class IdSchema(BaseModel, from_attributes=True):
 
 
 class PageParams(TypedDict, total=False):
-    offset: int
-    limit: int | None
+    offset: int | None
+    limit: int

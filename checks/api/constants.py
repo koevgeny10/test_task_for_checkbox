@@ -11,14 +11,14 @@ class EndpointTag(StrEnum):
 OPENAPI_TAGS = [
     {
         "name": EndpointTag.AUTH.value,
-        "description": "Посилання для авторизації.",
+        "description": "Для авторизації.",
     },
     {
         "name": EndpointTag.USER.value,
-        "description": "Посилання для роботи з користувачами.",
+        "description": "Для роботи з користувачами.",
     },
     {
         "name": EndpointTag.CHECK.value,
-        "description": "Посилання для роботи з чеками.",
+        "description": "Для роботи з чеками.",
     },
 ]
