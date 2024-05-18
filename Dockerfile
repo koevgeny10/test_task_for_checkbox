@@ -62,7 +62,6 @@ ENV PATH="/home/app/.local/bin:${PATH}"
 
 FROM not_root_user AS api
 
-#WORKDIR /${APP_DIR}/checks
 ENV PYTHONPATH="/${APP_DIR}/checks:${PYTHONPATH}"
 
 ENTRYPOINT [ "uvicorn", "checks.api:app", "--host", "0.0.0.0", "--port", "80", "--loop", "uvloop" ]
@@ -89,8 +88,6 @@ FROM src AS migrations
 
 COPY alembic.ini .
 COPY migrations migrations
-
-ENTRYPOINT ["bash"]
 
 FROM migrations AS tests
 
