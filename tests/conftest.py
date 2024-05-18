@@ -27,7 +27,7 @@ from checks.repository.connect import (
     get_sa_sessionmaker,
 )
 from tests.constants import alembic_config
-from tests.databases_menagment import (
+from tests.databases_management import (
     create_database_async,
     drop_database_async,
 )
