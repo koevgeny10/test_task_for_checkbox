@@ -1,9 +1,9 @@
 import operator
 from collections.abc import Generator, Mapping
-from typing import Any
+from typing import Any, TypeVar
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, Select, select
+from sqlalchemy import ColumnElement, Select, func, select
 
 from checks.domain.base import PageParams
 from checks.domain.check import CheckFilters
@@ -27,18 +27,44 @@ def _get_whereclauses_for_sa_query(
             yield operator_function(model_field, filter_value)
 
 
+SelectReturn = TypeVar("SelectReturn")
+
+
+def get_select_query_with_additional_filters(
+    stmt: Select[tuple[SelectReturn]],
+    user_id: int,
+    check_filters: CheckFilters | None = None,
+) -> Select[tuple[SelectReturn]]:
+    if check_filters is not None:
+        stmt = stmt.where(
+            *_get_whereclauses_for_sa_query(CheckModel, check_filters),
+        )
+    return stmt.where(
+        CheckModel.user_id == user_id,
+    )
+
+
+def get_select_count_checks(
+    user_id: int,
+    check_filters: CheckFilters | None = None,
+) -> Select[tuple[int]]:
+    return get_select_query_with_additional_filters(
+        select(func.count()),  # pylint: disable=not-callable
+        user_id,
+        check_filters,
+    )
+
+
 def get_select_checks_sql_query(
     user_id: int,
     check_filters: CheckFilters | None = None,
     page_params: PageParams | None = None,
 ) -> Select[tuple[CheckModel]]:
-    stmt = select(CheckModel).where(
-        CheckModel.user_id == user_id,
+    stmt = get_select_query_with_additional_filters(
+        select(CheckModel),
+        user_id,
+        check_filters,
     )
-    if check_filters is not None:
-        stmt = stmt.where(
-            *_get_whereclauses_for_sa_query(CheckModel, check_filters),
-        )
     if page_params is not None:
         offset = page_params.get("offset")
         if offset is not None:

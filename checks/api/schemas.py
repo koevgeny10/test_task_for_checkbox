@@ -1,5 +1,5 @@
 from checks.domain.base import IdSchema
-from checks.domain.schemas import Password, UserBase, UserEmail
+from checks.domain.user import Password, UserBase, UserEmail
 
 
 class Credentials(UserEmail):

@@ -4,12 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from checks.domain.base import PageParams
 from checks.domain.check import Check, CheckCreate, CheckFilters
-from checks.domain.schemas import UserCreate
+from checks.domain.user import UserCreate
 from checks.repository.models.check import CheckModel
 from checks.repository.models.user import UserModel
 from checks.repository.queries import (
     get_select_check_by_public_id_sql_query,
     get_select_checks_sql_query,
+    get_select_count_checks,
     get_select_user_filtered_by_email_sql_query,
 )
 
@@ -71,3 +72,13 @@ async def get_checks(
             get_select_checks_sql_query(user_id, check_filters, page_params),
         )
     )
+
+
+async def get_total_checks(
+    session: AsyncSession,
+    user_id: int,
+    check_filters: CheckFilters | None = None,
+) -> int:
+    return (
+        await session.execute(get_select_count_checks(user_id, check_filters))
+    ).scalar_one()

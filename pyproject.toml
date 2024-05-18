@@ -67,7 +67,7 @@ ignore = [
     "FIX002",
     "TRY003",
     "EM",
-    "RUF001"
+    "RUF001", "RUF002"
 #    "RUF012"
 ]
 ignore-init-module-imports = true

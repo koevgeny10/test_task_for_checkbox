@@ -113,7 +113,8 @@ async def test_get_checks(
     response = await registered_client.get("checks/", params=params)
     assert response.status_code == 200
     assert (
-        tuple(check["id"] for check in response.json()) == expected_check_ids
+        tuple(check["id"] for check in response.json()["items"])
+        == expected_check_ids
     )
 
 

@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 
 from checks import actions
 from checks.api.constants import EndpointTag
 from checks.api.dependencies.db import SessionDepAnnotated
-from checks.domain.schemas import UserCreate
+from checks.domain.user import UserCreate
 
 users_router = APIRouter(prefix="/users", tags=[EndpointTag.USER])
 
@@ -16,4 +17,10 @@ async def create_user(
     user_create: Annotated[UserCreate, Body()],
 ) -> None:
     """Створення користувачів."""
-    await actions.create_user(session, user_create)
+    try:
+        await actions.create_user(session, user_create)
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Цей email зайнятий",
+        ) from e

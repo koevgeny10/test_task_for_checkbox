@@ -15,7 +15,7 @@ from pydantic import (
     model_validator,
 )
 
-from checks.domain.base import IdSchema
+from checks.domain.base import IdSchema, PageParams
 from checks.domain.constants import PaymentType
 
 money_field = Field(
@@ -30,7 +30,7 @@ _Money = Annotated[Decimal, money_field]
 class _ProductCreate(BaseModel, frozen=True):
     name: str
     price: _Money
-    quantity: Annotated[int, Field(ge=1)]
+    quantity: Annotated[PositiveInt, Field(examples=[1])]
 
     @cached_property
     def total(self) -> Decimal:
@@ -108,6 +108,15 @@ class Check(IdSchema, _CheckABC[_Product]):
         ),
     ]:
         return self.payment.amount - self.total
+
+
+class Pagination(PageParams):
+    total: int
+
+
+class CheckPage(BaseModel):
+    items: tuple[Check, ...]
+    pagination: Pagination
 
 
 class CheckFilters(TypedDict, total=False):

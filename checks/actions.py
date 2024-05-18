@@ -6,9 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from checks import repository
 from checks.domain.base import PageParams
-from checks.domain.check import Check, CheckCreate, CheckFilters
+from checks.domain.check import (
+    Check,
+    CheckCreate,
+    CheckFilters,
+    CheckPage,
+    Pagination,
+)
 from checks.domain.constants import PaymentType
-from checks.domain.schemas import UserCreate
+from checks.domain.user import UserCreate
 from checks.repository import get_check_by_public_id
 
 
@@ -79,12 +85,22 @@ async def get_check_in_text(
 async def get_checks(
     session: AsyncSession,
     user_id: int,
+    page_params: PageParams,
     check_filters: CheckFilters | None = None,
-    page_params: PageParams | None = None,
-) -> tuple[Check, ...]:
-    return await repository.get_checks(
-        session,
-        user_id,
-        check_filters,
-        page_params,
+) -> CheckPage:
+    return CheckPage(
+        items=await repository.get_checks(
+            session,
+            user_id,
+            check_filters,
+            page_params,
+        ),
+        pagination=Pagination(
+            total=await repository.get_total_checks(
+                session,
+                user_id,
+                check_filters,
+            ),
+            **page_params,
+        ),
     )

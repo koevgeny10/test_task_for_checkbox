@@ -19,7 +19,7 @@ from checks.api.dependencies.check import get_check_filters
 from checks.api.dependencies.db import SessionDepAnnotated
 from checks.api.dependencies.pagination import get_page_params
 from checks.domain.base import PageParams
-from checks.domain.check import Check, CheckCreate, CheckFilters
+from checks.domain.check import Check, CheckCreate, CheckFilters, CheckPage
 
 check_router = APIRouter(prefix="/checks", tags=[EndpointTag.CHECK])
 
@@ -34,6 +34,7 @@ async def create_check(
     user_id: CurrentUserIdDepAnnotated,
     check_create: Annotated[CheckCreate, Body()],
 ) -> Check:
+    """Для створення чеків."""
     return await actions.create_check(session, user_id, check_create)
 
 
@@ -43,12 +44,13 @@ async def get_checks(
     user_id: CurrentUserIdDepAnnotated,
     check_filters: Annotated[CheckFilters, Depends(get_check_filters)],
     page_params: Annotated[PageParams, Depends(get_page_params)],
-) -> tuple[Check, ...]:
+) -> CheckPage:
+    """Для перегляду чеків."""
     return await actions.get_checks(
         session,
         user_id,
-        check_filters,
         page_params,
+        check_filters,
     )
 
 
@@ -58,11 +60,12 @@ async def get_check(
     user_id: CurrentUserIdDepAnnotated,
     check_id: Annotated[int, Path(ge=1)],
 ) -> Check:
+    """Для перегляду чеку."""
     check = await actions.get_check(session, check_id)
     if check.user_id == user_id:
         return check
     raise HTTPException(
-        status_code=status.HTTP_402_PAYMENT_REQUIRED,
+        status_code=status.HTTP_403_FORBIDDEN,
         detail="Користувач не має доступу до цього чеку.",
     )
 
@@ -73,4 +76,5 @@ async def get_check_in_text(
     check_public_id: UUID,
     line_len: Annotated[int, Query(ge=1)] = 30,
 ) -> str:
+    """Для перегляду чеку у публічному форматі текстом."""
     return await actions.get_check_in_text(session, check_public_id, line_len)

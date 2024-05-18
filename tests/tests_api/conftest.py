@@ -31,8 +31,8 @@ class BearerAuth(Auth):
         self,
         request: Request,
     ) -> Generator[Request, Response, None]:
-        # Send the request, with a custom `X-Authentication` header.
-        request.headers["Authorization"] = f"bearer {self.token}"
+        # Send the request, with a custom `Authorization` header.
+        request.headers["Authorization"] = f"Bearer {self.token}"
         yield request
 
 
