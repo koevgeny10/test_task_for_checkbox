@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, func, text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, func, text
 from sqlalchemy.orm import Mapped, composite, mapped_column, relationship
 
 from checks.domain.constants import PaymentType
@@ -21,8 +21,12 @@ class ProductModel(BaseModel):
         lazy="joined",
     )
     name: Mapped[str]
-    price: Mapped[Decimal]
-    quantity: Mapped[int]
+    price: Mapped[Decimal] = mapped_column(
+        CheckConstraint("price > 0", name="positive price"),
+    )
+    quantity: Mapped[int] = mapped_column(
+        CheckConstraint("quantity > 0", name="positive quantity"),
+    )
 
 
 @dataclass
@@ -45,9 +49,13 @@ class CheckModel(BaseModel):
         lazy="selectin",
     )
     payment_type: Mapped[PaymentType] = mapped_column()
-    payment_amount: Mapped[Decimal] = mapped_column()
+    payment_amount: Mapped[Decimal] = mapped_column(
+        CheckConstraint("payment_amount > 0", name="positive payment_amount"),
+    )
     payment: Mapped[_Payment] = composite(payment_type, payment_amount)
-    total: Mapped[Decimal]
+    total: Mapped[Decimal] = mapped_column(
+        CheckConstraint("total > 0", name="positive total"),
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),  # pylint: disable=not-callable
