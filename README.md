@@ -30,13 +30,12 @@ JWT_LIFETIME_MINUTES=2880
 У корені проекту створіть папку configs
 
 #### Ключі шифрування для JWT
-У папці configs створіть папку jwt</br>
 Виконайте команди:
 ```
 ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
 openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 ```
-Отримані файли покладіть у папку configs/jwt
+У папці configs створіть папку jwt та покладіть у неї отримані файли
 
 #### Конфіг для pgadmin4
 У папці configs створіть папку pgadmin4</br>
@@ -75,6 +74,10 @@ docker compose --profile migrations run migrations alembic upgrade head
 ```
 docker compose --profile prod up --build
 ```
+Після цього документація до REST API буде доступна за посиланнями:
+- http://localhost/docs
+- http://localhost/docs2
+
 Для запуску тестів виконайте:
 ```
 docker compose --profile tests up --build
